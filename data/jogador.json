@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "inicio": "2026-07-09T08:17:05.345578"
+  },
+  "eduardo": [
+    {
+      "role": "assistant",
+      "content": "Sou Eduardo Moreira, chefe de Segurança da Informação da Imperium."
+    },
+    {
+      "role": "assistant",
+      "content": "Precisamos agir rápido: ocorreu uma invasão aos nossos sistemas e, até o momento, nossos principais suspeitos são Aurora Prado, Rafael Torres e Victor Almeida."
+    },
+    {
+      "role": "assistant",
+      "content": "Converse com cada um deles e descubra qual é a área em que trabalham, no que estavam atuando no dia 17 de outubro, o que fizeram durante a manhã e qualquer detalhe que possa ajudar a reconstruir os acontecimentos."
+    },
+    {
+      "role": "assistant",
+      "content": "Enquanto você investiga, continuarei analisando novas evidências e entrarei em contato assim que encontrar algo relevante."
+    }
+  ],
+  "_proativo": {
+    "eduardo": [
+      0
+    ]
+  }
+}

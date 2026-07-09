@@ -1,0 +1,2587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAST HOPE — Investigation App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   LAST HOPE — Investigation App Stylesheet
+   Theme: Black × Amber × Gold × Neon Cyan
+   ═══════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────
+   0. DESIGN TOKENS
+──────────────────────────────────────────── */
+:root {
+  /* Core palette */
+  --color-bg:           #0a0a0a;
+  --color-surface:      #111111;
+  --color-surface-2:    #181818;
+  --color-surface-3:    #212121;
+  --color-border:       #2a2a2a;
+  --color-border-glow:  rgba(245, 197, 24, 0.25);
+
+  /* Brand */
+  --color-amber:        #F5C518;
+  --color-amber-dim:    #c49a12;
+  --color-gold:         #C9A84C;
+  --color-gold-dim:     #8a6d2e;
+
+  /* Neon accent (status, alerts) */
+  --color-neon:         #00FFD1;
+  --color-neon-dim:     rgba(0, 255, 209, 0.15);
+  --color-alert:        #FF4C4C;
+  --color-away:         #FFB347;
+
+  /* Text */
+  --color-text-primary:   #F0F0F0;
+  --color-text-secondary: #888888;
+  --color-text-muted:     #555555;
+
+  /* Avatar accent colors (per contact type) */
+  --avatar-ai:      linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+  --avatar-suspect: linear-gradient(135deg, #1a0a0a 0%, #3d0c0c 100%);
+  --avatar-lawyer:  linear-gradient(135deg, #0e0e0e 0%, #1c1c1c 100%);
+  --avatar-admin:   linear-gradient(135deg, #0a1a1a 0%, #0c2e2e 100%);
+  --avatar-finance: linear-gradient(135deg, #1a150a 0%, #2e2410 100%);
+  --avatar-security: linear-gradient(135deg, #0a0f1a 0%, #0c1e3d 100%);
+  --avatar-ceo: linear-gradient(135deg, #1a0a1a 0%, #2e0c3d 100%);
+
+  /* Spacing */
+  --sp-xs:  4px;
+  --sp-sm:  8px;
+  --sp-md:  16px;
+  --sp-lg:  24px;
+  --sp-xl:  32px;
+
+  /* Typography */
+  --font-display: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* Sidebar width */
+  --sidebar-w: 320px;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-normal: 250ms;
+  --dur-slow: 400ms;
+}
+
+/* ──────────────────────────────────────────
+   1. RESET & BASE
+──────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+}
+
+input {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ──────────────────────────────────────────
+   2. APP LAYOUT
+──────────────────────────────────────────── */
+.app {
+  display: flex;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ──────────────────────────────────────────
+   3. SIDEBAR
+──────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  position: relative;
+  z-index: 10;
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+/* Subtle amber glow on the right edge */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -1px; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    var(--color-amber) 30%,
+    var(--color-gold) 70%,
+    transparent 100%
+  );
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── 3a. Sidebar Header ── */
+.sidebar__header {
+  padding: var(--sp-md) var(--sp-md) var(--sp-sm);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  margin-bottom: var(--sp-md);
+}
+
+.logo-icon {
+  font-size: 22px;
+  color: var(--color-amber);
+  animation: pulse-glow 3s ease-in-out infinite;
+  line-height: 1;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--color-amber);
+}
+
+.logo-tag {
+  font-size: 10px;
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-left: auto;
+  border: 1px solid var(--color-border);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+.sidebar__player {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+
+/* Player avatar */
+.player-avatar {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.player-avatar__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-amber-dim), var(--color-gold));
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+}
+
+.player-avatar__status {
+  position: absolute;
+  bottom: 1px; right: 1px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
+}
+
+.player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-info__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-info__role {
+  font-size: 11px;
+  color: var(--color-gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── 3c. Section label ── */
+.sidebar__section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-sm) var(--sp-md) var(--sp-xs);
+  font-size: 10px;
+  font-family: var(--font-display);
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.contact-count {
+  background: var(--color-surface-3);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0 7px;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+/* ── 3d. Contact List ── */
+.contact-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--sp-xs) 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.contact-list::-webkit-scrollbar { width: 4px; }
+.contact-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Individual contact card */
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--sp-md);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--dur-fast) var(--ease);
+  border-left: 2px solid transparent;
+  outline: none;
+}
+
+.contact-item:hover {
+  background: var(--color-surface-2);
+}
+
+.contact-item:focus-visible {
+  background: var(--color-surface-2);
+  border-left-color: var(--color-amber);
+}
+
+.contact-item.is-active {
+  background: var(--color-surface-3);
+  border-left-color: var(--color-amber);
+}
+
+.contact-item.is-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(245,197,24,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Contact avatar */
+.contact-avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-normal) var(--ease),
+              box-shadow var(--dur-normal) var(--ease);
+}
+
+.contact-item:hover .contact-avatar,
+.contact-item.is-active .contact-avatar {
+  transform: scale(1.05);
+}
+
+.contact-avatar--ai {
+  background: var(--avatar-ai);
+  border: 1px solid rgba(0, 255, 209, 0.3);
+  box-shadow: 0 0 12px rgba(0, 255, 209, 0.15);
+}
+.contact-item.is-active .contact-avatar--ai,
+.contact-item:hover .contact-avatar--ai {
+  box-shadow: 0 0 20px rgba(0, 255, 209, 0.35);
+}
+
+/* Victor — Operações: laranja */
+.contact-avatar--suspect-opr {
+  background: linear-gradient(135deg, #1a0e00 0%, #3d2000 100%);
+  border: 1px solid rgba(255, 140, 0, 0.35);
+}
+.contact-item.is-active .contact-avatar--suspect-opr,
+.contact-item:hover .contact-avatar--suspect-opr {
+  box-shadow: 0 0 16px rgba(255, 140, 0, 0.3);
+}
+.contact-avatar--suspect-opr .contact-avatar__initials { color: #ff9f40; }
+
+/* Rafael — Administrativo: amarelo-esverdeado */
+.contact-avatar--suspect-adm {
+  background: linear-gradient(135deg, #0e1a00 0%, #1e3a00 100%);
+  border: 1px solid rgba(160, 220, 40, 0.35);
+}
+.contact-item.is-active .contact-avatar--suspect-adm,
+.contact-item:hover .contact-avatar--suspect-adm {
+  box-shadow: 0 0 16px rgba(160, 220, 40, 0.3);
+}
+.contact-avatar--suspect-adm .contact-avatar__initials { color: #aadc50; }
+
+/* Aurora — Financeiro: rosa/magenta */
+.contact-avatar--suspect-fin {
+  background: linear-gradient(135deg, #1a0014 0%, #3d0030 100%);
+  border: 1px solid rgba(255, 80, 180, 0.35);
+}
+.contact-item.is-active .contact-avatar--suspect-fin,
+.contact-item:hover .contact-avatar--suspect-fin {
+  box-shadow: 0 0 16px rgba(255, 80, 180, 0.3);
+}
+.contact-avatar--suspect-fin .contact-avatar__initials { color: #ff70c0; }
+
+.contact-avatar--lawyer {
+  background: var(--avatar-lawyer);
+  border: 1px solid var(--color-gold-dim);
+}
+.contact-item:hover .contact-avatar--lawyer,
+.contact-item.is-active .contact-avatar--lawyer {
+  box-shadow: 0 0 16px rgba(201,168,76, 0.25);
+}
+
+.contact-avatar--admin {
+  background: var(--avatar-admin);
+  border: 1px solid rgba(0,200,200,0.2);
+}
+
+.contact-avatar--finance {
+  background: var(--avatar-finance);
+  border: 1px solid rgba(245,197,24,0.2);
+}
+
+.contact-avatar--security {
+  background: var(--avatar-security);
+  border: 1px solid rgba(30,100,220,0.35);
+}
+.contact-item:hover .contact-avatar--security,
+.contact-item.is-active .contact-avatar--security {
+  box-shadow: 0 0 16px rgba(30,100,220,0.3);
+}
+
+.contact-avatar--ceo {
+  background: var(--avatar-ceo);
+  border: 1px solid rgba(180,80,220,0.4);
+}
+.contact-item:hover .contact-avatar--ceo,
+.contact-item.is-active .contact-avatar--ceo {
+  box-shadow: 0 0 18px rgba(180,80,220,0.35);
+}
+
+.contact-avatar__initials,
+.contact-avatar__glyph {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  user-select: none;
+}
+
+.contact-avatar--ai .contact-avatar__glyph {
+  font-size: 22px;
+  color: var(--color-neon);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.contact-avatar--lawyer .contact-avatar__initials  { color: var(--color-gold); }
+.contact-avatar--admin .contact-avatar__initials   { color: #80d4d4; }
+.contact-avatar--finance .contact-avatar__initials { color: var(--color-amber); }
+.contact-avatar--security .contact-avatar__initials { color: #6ea8fe; }
+.contact-avatar--ceo .contact-avatar__initials      { color: #d580ff; }
+
+/* Status dot on contact */
+.contact-avatar__status {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
+}
+
+/* Status colors */
+.status--online  { background: var(--color-neon); }
+.status--away    { background: var(--color-away); }
+.status--offline { background: var(--color-text-muted); }
+
+/* Contact text body */
+.contact-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-xs);
+}
+
+.contact-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-time {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.contact-preview-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  margin-top: 2px;
+}
+
+.contact-preview {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* Unread badge */
+.contact-badge {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--color-amber);
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  font-family: var(--font-display);
+  letter-spacing: 0;
+}
+
+.contact-badge--alert {
+  background: var(--color-alert);
+  color: #fff;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Role tag (right side) */
+.contact-tag {
+  font-size: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 5px;
+  border-radius: 2px;
+  align-self: flex-start;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.contact-tag--ai      { color: var(--color-neon); border: 1px solid rgba(0,255,209,0.4); background: rgba(0,255,209,0.06); }
+.contact-tag--suspect-opr { color: #ff9f40; border: 1px solid rgba(255,140,0,0.4); background: rgba(255,140,0,0.06); }
+.contact-tag--suspect-adm { color: #aadc50; border: 1px solid rgba(160,220,40,0.4); background: rgba(160,220,40,0.06); }
+.contact-tag--suspect-fin { color: #ff70c0; border: 1px solid rgba(255,80,180,0.4); background: rgba(255,80,180,0.06); }
+.contact-tag--lawyer  { color: var(--color-gold); border: 1px solid rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
+.contact-tag--admin   { color: #80d4d4; border: 1px solid rgba(128,212,212,0.4); background: rgba(128,212,212,0.06); }
+.contact-tag--finance { color: var(--color-amber); border: 1px solid rgba(245,197,24,0.4); background: rgba(245,197,24,0.06); }
+.contact-tag--security { color: #6ea8fe; border: 1px solid rgba(110,168,254,0.4); background: rgba(110,168,254,0.06); }
+.contact-tag--ceo      { color: #d580ff; border: 1px solid rgba(213,128,255,0.4); background: rgba(213,128,255,0.06); }
+
+/* ── 3e. Sidebar Footer ── */
+.sidebar__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-sm) var(--sp-md);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+  color: var(--color-neon);
+}
+
+.footer-status__dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-neon);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.footer-ver {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+}
+
+/* ──────────────────────────────────────────
+   4. MAIN PANEL
+──────────────────────────────────────────── */
+.main-panel {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── 4a. Scanlines (signature atmospheric element) ── */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+}
+
+/* ── 4b. Particle canvas ── */
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ──────────────────────────────────────────
+   5. WELCOME SCREEN
+──────────────────────────────────────────── */
+.welcome {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-lg);
+  padding: var(--sp-xl);
+  text-align: center;
+  animation: fade-in var(--dur-slow) var(--ease) both;
+}
+
+/* Rotating emblem */
+.welcome__emblem {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--sp-sm);
+}
+
+.emblem-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid;
+}
+
+.emblem-ring--outer {
+  inset: 0;
+  border-color: rgba(245, 197, 24, 0.2);
+  animation: spin 20s linear infinite reverse;
+}
+
+.emblem-ring--mid {
+  inset: 16px;
+  border-color: rgba(201, 168, 76, 0.35);
+  border-style: dashed;
+  animation: spin 12s linear infinite;
+}
+
+.emblem-ring--inner {
+  inset: 32px;
+  border-color: var(--color-amber);
+  opacity: 0.7;
+  animation: spin 6s linear infinite reverse;
+}
+
+.emblem-glyph {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  color: var(--color-amber);
+  animation: pulse-glow 3s ease-in-out infinite;
+  line-height: 1;
+}
+
+.welcome__title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+}
+
+.welcome__subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05em;
+  max-width: 360px;
+}
+
+/* Stats row */
+.welcome__stats {
+  display: flex;
+  gap: var(--sp-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--dur-normal) var(--ease),
+              transform var(--dur-normal) var(--ease);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--color-amber);
+  opacity: 0.5;
+}
+
+.stat-card:hover {
+  border-color: var(--color-amber-dim);
+  transform: translateY(-2px);
+}
+
+.stat-card--alert::before {
+  background: var(--color-alert);
+}
+
+.stat-card__icon {
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-amber);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.stat-card__icon--alert {
+  color: var(--color-alert);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.stat-card__icon--notif {
+  color: var(--color-neon);
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.stat-card--notif::before {
+  background: var(--color-neon);
+}
+
+/* Ponto vermelho pulsante no card de notificações */
+.stat-card__notif-dot {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--color-alert);
+  animation: badge-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── SISTEMA DE NOTIFICAÇÕES ──────────────────
+   Controlado 100% pelo JavaScript.
+   Nunca colocar valores fixos no HTML.
+   Use: mostrarNotificacao(), removerNotificacao(), atualizarNotificacao()
+──────────────────────────────────────────────── */
+
+/* Badge de notificação no contato (criado via JS) */
+.notif-badge {
+  flex-shrink: 0;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  letter-spacing: 0;
+  animation: fade-in 200ms ease both;
+}
+
+.notif-badge--normal {
+  background: var(--color-amber);
+  color: #000;
+}
+
+.notif-badge--alert {
+  background: var(--color-alert);
+  color: #fff;
+  animation: badge-pulse 1.5s ease-in-out infinite;
+}
+
+/* Highlight pulsante no item do contato quando tem notificação */
+.contact-item--has-notif {
+  animation: notif-highlight 2s ease-in-out infinite;
+}
+
+@keyframes notif-highlight {
+  0%, 100% { background: transparent; }
+  50%       { background: rgba(245, 197, 24, 0.04); }
+}
+
+/* Borda esquerda acesa quando há notificação */
+.contact-item--has-notif {
+  border-left-color: var(--color-amber) !important;
+}
+
+.stat-card__label {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Keyboard hints */
+.welcome__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.hint-key {
+  display: inline-block;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+/* ──────────────────────────────────────────
+   6. CHAT AREA
+──────────────────────────────────────────── */
+.chat-area {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  animation: fade-in var(--dur-normal) var(--ease) both;
+}
+
+.chat-area__back {
+  display: none;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-md);
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: var(--color-amber);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.chat-area__back:hover { color: #fff; }
+
+/* Chat header */
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-md);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.chat-header__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.chat-header__info { flex: 1; min-width: 0; }
+
+.chat-header__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-header__status {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.chat-header__actions {
+  display: flex;
+  gap: var(--sp-xs);
+}
+
+/* Chat empty state */
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-xl);
+}
+
+.chat-empty__line {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: var(--color-text-muted);
+}
+
+.chat-empty__sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  max-width: 280px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── 6a. Chat Messages (bolhas de conversa) ──
+   Reaproveita as mesmas variáveis de cor do resto do app,
+   então o visual já nasce combinando com o tema existente. */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  position: relative;
+  z-index: 2;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+.msg {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: fade-in var(--dur-fast) var(--ease) both;
+  word-wrap: break-word;
+}
+
+/* Mensagem do jogador — alinhada à direita, cor âmbar (mesma do brand) */
+.msg--user {
+  align-self: flex-end;
+  background: var(--color-amber);
+  color: #000;
+  border-bottom-right-radius: 4px;
+}
+
+/* Mensagem do Victor — alinhada à esquerda, cor neutra da superfície */
+.msg--victor {
+  align-self: flex-start;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* Indicador de "digitando..." — 3 bolinhas pulsando em sequência */
+.msg--typing {
+  align-self: flex-start;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  padding: 10px 14px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.msg--typing .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-secondary);
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.msg--typing .dot:nth-child(2) { animation-delay: 0.2s; }
+.msg--typing .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Input bar */
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-md);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 9px var(--sp-md);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--dur-normal) var(--ease);
+}
+
+.chat-input:not(:disabled):focus {
+  border-color: var(--color-amber-dim);
+}
+
+.chat-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-send {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--color-amber);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease);
+}
+
+.btn-send:not(:disabled):hover {
+  background: #fff;
+  transform: scale(1.08);
+}
+
+.btn-send:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Generic icon button */
+.btn-icon {
+  width: 34px; height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  transition: background var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+
+.btn-icon:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+.btn-icon--attach { color: var(--color-text-muted); }
+
+/* ──────────────────────────────────────────
+   7. ANIMATIONS / KEYFRAMES
+──────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+  50%       { opacity: 0.65; filter: drop-shadow(0 0 12px currentColor); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,76,76,0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(255,76,76,0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ──────────────────────────────────────────
+   8. UTILITY
+──────────────────────────────────────────── */
+[hidden] { display: none !important; }
+
+/* No-results message */
+.contact-list__empty {
+  padding: var(--sp-xl) var(--sp-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+/* ──────────────────────────────────────────
+   9. RESPONSIVE — TABLET (≤ 768px)
+──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-w: 100%;
+  }
+
+  .app {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 100%;
+    z-index: 20;
+    border-right: none;
+    transition: transform var(--dur-slow) var(--ease),
+                opacity var(--dur-slow) var(--ease);
+  }
+
+  .sidebar.is-hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .main-panel {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    transition: transform var(--dur-slow) var(--ease),
+                opacity var(--dur-slow) var(--ease);
+  }
+
+  .main-panel.is-hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .chat-area__back {
+    display: flex;
+  }
+
+  .contact-item {
+    padding: 12px var(--sp-md);
+    min-height: 68px;
+  }
+
+  .contact-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .search-shortcut { display: none; }
+
+  .welcome__stats {
+    gap: var(--sp-sm);
+  }
+
+  .stat-card {
+    min-width: 80px;
+    padding: var(--sp-sm) var(--sp-md);
+  }
+}
+
+/* ──────────────────────────────────────────
+   10. RESPONSIVE — SMALL MOBILE (≤ 420px)
+──────────────────────────────────────────── */
+@media (max-width: 420px) {
+  .sidebar__logo { gap: 6px; }
+  .logo-text { font-size: 20px; }
+
+  .welcome__title { font-size: 20px; }
+  .welcome__stats { gap: var(--sp-xs); }
+
+  .stat-card {
+    padding: var(--sp-sm);
+    min-width: 70px;
+  }
+
+  .stat-card__value { font-size: 22px; }
+
+  .chat-input { font-size: 16px; }
+}
+
+/* ──────────────────────────────────────────
+   11. OPERAÇÃO LAST HOPE — Tela inicial, HUD,
+       modal de suspeitos e telas de fim de jogo.
+       Reaproveita as mesmas cores/fontes/animações
+       já definidas acima; não altera nada existente.
+──────────────────────────────────────────── */
+
+/* ── 11a. Tela inicial (briefing da missão) ── */
+.mission-start-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-lg);
+  padding: var(--sp-xl);
+  text-align: center;
+  background: var(--color-bg);
+}
+
+.mission-start-overlay__title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--color-amber);
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(245, 197, 24, 0.35);
+}
+
+.mission-start-overlay__desc {
+  max-width: 480px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.mission-start-overlay__desc strong {
+  color: var(--color-text-primary);
+}
+
+/* ── Botão de ação principal (INICIAR / REINICIAR MISSÃO) ── */
+.btn-mission-primary {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #000;
+  background: linear-gradient(135deg, var(--color-amber-dim), var(--color-gold));
+  border-radius: 6px;
+  padding: 14px 36px;
+  transition: transform var(--dur-normal) var(--ease),
+              box-shadow var(--dur-normal) var(--ease);
+  box-shadow: 0 0 0 rgba(245, 197, 24, 0);
+}
+
+.btn-mission-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245, 197, 24, 0.25);
+}
+
+/* ── 11b. HUD da missão: cronômetro + botão de emergência ── */
+.mission-hud {
+  position: fixed;
+  top: var(--sp-md);
+  right: var(--sp-md);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+.mission-timer {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-amber);
+  min-width: 64px;
+  text-align: center;
+}
+
+.mission-timer--urgent {
+  color: var(--color-alert);
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
+.btn-mission-emergency {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-alert);
+  background: transparent;
+  border: 1px solid var(--color-alert);
+  border-radius: 6px;
+  padding: 8px 12px;
+  transition: background var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+
+.btn-mission-emergency:hover {
+  background: var(--color-alert);
+  color: #000;
+}
+
+/* ── 11c. Modal de escolha do suspeito ── */
+.suspect-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-lg);
+  background: rgba(0, 0, 0, 0.78);
+  animation: fade-in var(--dur-normal) var(--ease) both;
+}
+
+.suspect-modal {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-glow);
+  border-radius: 10px;
+  padding: var(--sp-xl);
+  text-align: center;
+  box-shadow: 0 0 40px rgba(245, 197, 24, 0.1);
+}
+
+.suspect-modal__close {
+  position: absolute;
+  top: var(--sp-sm);
+  right: var(--sp-sm);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.suspect-modal__close:hover {
+  background: var(--color-surface-3);
+  color: var(--color-text-primary);
+}
+
+.suspect-modal__title {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--sp-lg);
+}
+
+.suspect-modal__cards {
+  display: flex;
+  gap: var(--sp-md);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.suspect-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-sm);
+  width: 160px;
+  padding: var(--sp-lg) var(--sp-md);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: border-color var(--dur-normal) var(--ease),
+              transform var(--dur-normal) var(--ease);
+}
+
+.suspect-card:hover {
+  border-color: var(--color-amber-dim);
+  transform: translateY(-2px);
+}
+
+.suspect-card__name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.suspect-card__role {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.suspect-card__btn {
+  margin-top: var(--sp-xs);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #000;
+  background: var(--color-amber);
+  border-radius: 6px;
+  padding: 8px 14px;
+  width: 100%;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.suspect-card__btn:hover { background: #fff; }
+
+/* ── 11d. Tela de fim de missão (vitória / derrota / tempo esgotado) ── */
+.mission-end-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-md);
+  padding: var(--sp-xl);
+  text-align: center;
+  background: var(--color-bg);
+  animation: fade-in var(--dur-slow) var(--ease) both;
+}
+
+.mission-end-overlay--vitoria {
+  background: radial-gradient(circle at 50% 38%, rgba(0, 255, 209, 0.14), var(--color-bg) 70%);
+}
+
+.mission-end-overlay--derrota {
+  background: radial-gradient(circle at 50% 38%, rgba(255, 76, 76, 0.14), var(--color-bg) 70%);
+}
+
+.mission-end__title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mission-end-overlay--vitoria .mission-end__title {
+  color: var(--color-neon);
+  text-shadow: 0 0 20px rgba(0, 255, 209, 0.45);
+}
+
+.mission-end-overlay--derrota .mission-end__title {
+  color: var(--color-alert);
+  text-shadow: 0 0 20px rgba(255, 76, 76, 0.45);
+}
+
+.mission-end__text {
+  max-width: 440px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 420px) {
+  .mission-hud { top: var(--sp-sm); right: var(--sp-sm); }
+  .mission-timer { font-size: 16px; min-width: 52px; }
+  .suspect-modal__cards { gap: var(--sp-sm); }
+  .suspect-card { width: 130px; padding: var(--sp-md) var(--sp-sm); }
+}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ OPERAÇÃO LAST HOPE — camadas de missão ══════════════ -->
+
+<!-- Tela inicial: nada começa até o jogador clicar em INICIAR MISSÃO -->
+<div class="mission-start-overlay" id="missionStartOverlay">
+  <div class="welcome__emblem">
+    <span class="emblem-ring emblem-ring--outer"></span>
+    <span class="emblem-ring emblem-ring--mid"></span>
+    <span class="emblem-ring emblem-ring--inner"></span>
+    <span class="emblem-glyph">⬡</span>
+  </div>
+  <h1 class="mission-start-overlay__title">Operação Last Hope</h1>
+  <p class="mission-start-overlay__desc">
+    Os servidores da Imperium foram comprometidos. Você possui apenas
+    <strong>6 minutos</strong> para descobrir quem permitiu a invasão antes
+    que todos os bancos de dados sejam apagados.
+  </p>
+  <button class="btn-mission-primary" id="btnIniciarMissao">Iniciar Missão</button>
+</div>
+
+<!-- HUD: cronômetro + botão de emergência (aparece só depois de iniciar) -->
+<div class="mission-hud" id="missionHud" hidden>
+  <span class="mission-timer" id="missionTimer">03:00</span>
+  <button class="btn-mission-emergency" id="btnEmergencia" title="Abrir tela de escolha do suspeito">Emergência</button>
+</div>
+
+<!-- Modal de escolha do suspeito -->
+<div class="suspect-modal-overlay" id="suspectModalOverlay" hidden>
+  <div class="suspect-modal">
+    <button class="suspect-modal__close" id="suspectModalClose" hidden title="Voltar para a investigação">✕</button>
+    <h2 class="suspect-modal__title">Quem permitiu a invasão da Imperium?</h2>
+    <div class="suspect-modal__cards">
+      <div class="suspect-card">
+        <span class="suspect-card__name">Aurora Prado</span>
+        <span class="suspect-card__role">Analista Financeira</span>
+        <button class="suspect-card__btn" data-suspeito="aurora">Selecionar</button>
+      </div>
+      <div class="suspect-card">
+        <span class="suspect-card__name">Rafael Torres</span>
+        <span class="suspect-card__role">Administrador</span>
+        <button class="suspect-card__btn" data-suspeito="rafael">Selecionar</button>
+      </div>
+      <div class="suspect-card">
+        <span class="suspect-card__name">Victor Almeida</span>
+        <span class="suspect-card__role">Advogado</span>
+        <button class="suspect-card__btn" data-suspeito="victor">Selecionar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tela de fim de missão (vitória / derrota / tempo esgotado) -->
+<div class="mission-end-overlay" id="missionEndOverlay" hidden>
+  <h1 class="mission-end__title" id="missionEndTitle"></h1>
+  <p class="mission-end__text" id="missionEndText"></p>
+  <button class="btn-mission-primary" id="btnReiniciarMissao">Reiniciar Missão</button>
+</div>
+
+<div class="app" id="app">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar__header">
+      <div class="sidebar__logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">LAST HOPE</span>
+        <span class="logo-tag">v0.1</span>
+      </div>
+
+      <div class="sidebar__player">
+        <div class="player-avatar">
+          <div class="player-avatar__initials">DT</div>
+          <span class="player-avatar__status status--online"></span>
+        </div>
+        <div class="player-info">
+          <div class="player-info__name">Detetive</div>
+          <div class="player-info__role">Investigador</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar__section-label">
+      CONTATOS
+      <span class="contact-count" id="contactCount">0</span>
+    </div>
+
+    <div class="contact-list" id="contactList" role="list"></div>
+
+    <div class="sidebar__footer">
+      <div class="footer-status">
+        <span class="footer-status__dot"></span>
+        SISTEMA ATIVO
+      </div>
+      <span class="footer-ver">BUILD 678208</span>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════ MAIN PANEL ══════════════ -->
+  <main class="main-panel" id="mainPanel">
+
+    <div class="scanlines"></div>
+    <canvas class="particle-canvas" id="particleCanvas"></canvas>
+
+    <!-- Welcome screen (shown when no contact selected) -->
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome__emblem">
+        <span class="emblem-ring emblem-ring--outer"></span>
+        <span class="emblem-ring emblem-ring--mid"></span>
+        <span class="emblem-ring emblem-ring--inner"></span>
+        <span class="emblem-glyph">⬡</span>
+      </div>
+      <h1 class="welcome__title">Last Hope</h1>
+      <p class="welcome__subtitle">Selecione um contato para iniciar a investigação.</p>
+      <div class="welcome__stats">
+        <div class="stat-card" id="statContatos">
+          <span class="stat-card__icon">◈</span>
+          <span class="stat-card__label">Contatos</span>
+        </div>
+        <div class="stat-card stat-card--alert" id="statSuspeitos">
+          <span class="stat-card__icon stat-card__icon--alert">⚠</span>
+          <span class="stat-card__label">Suspeitos</span>
+        </div>
+        <div class="stat-card stat-card--notif" id="statNotificacoes">
+          <span class="stat-card__icon stat-card__icon--notif">◉</span>
+          <span class="stat-card__label">Notificações</span>
+          <span class="stat-card__notif-dot" id="statNotifDot" hidden></span>
+        </div>
+      </div>
+      <p class="welcome__hint">
+        Use <kbd class="hint-key">↑↓</kbd> para navegar · <kbd class="hint-key">Enter</kbd> para selecionar
+      </p>
+    </div>
+
+    <!-- Chat area (hidden until contact selected) -->
+    <div class="chat-area" id="chatArea" hidden>
+
+      <button class="chat-area__back" id="backBtn">← Voltar</button>
+
+      <div class="chat-header" id="chatHeader">
+        <div class="chat-header__avatar" id="chatHeaderAvatar"></div>
+        <div class="chat-header__info">
+          <div class="chat-header__name" id="chatHeaderName"></div>
+          <div class="chat-header__status" id="chatHeaderStatus"></div>
+        </div>
+        <div class="chat-header__actions">
+          <button class="btn-icon" title="Mais opções">⋮</button>
+        </div>
+      </div>
+
+      <div class="chat-empty" id="chatEmpty">
+        <p class="chat-empty__line">— CANAL SEGURO ESTABELECIDO —</p>
+        <p class="chat-empty__sub">Nenhuma mensagem ainda. Inicie a conversa abaixo.</p>
+      </div>
+
+      <!-- Container onde as bolhas de mensagem e o "digitando..." aparecem -->
+      <div class="chat-messages" id="chatMessages" hidden></div>
+
+      <div class="chat-input-bar">
+        <button class="btn-icon btn-icon--attach" title="Anexar arquivo">📎</button>
+        <input
+          class="chat-input"
+          id="chatInput"
+          type="text"
+          placeholder="Digite sua mensagem..."
+          disabled
+          autocomplete="off"
+        />
+        <button class="btn-send" id="sendBtn" disabled title="Enviar">
+          ➤
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+/**
+ * LAST HOPE — Investigation App
+ * script.js (embedded)
+ */
+
+/* ══════════════════════════════════════════
+   CONTACT DATA
+══════════════════════════════════════════ */
+const CONTACTS = [
+  {
+    id: 'eduardo',
+    name: 'Eduardo Moreira',
+    role: 'Chefe de Segurança',
+    status: 'online',
+    statusText: 'Online',
+    type: 'security',
+    glyph: null,
+    initials: 'EM',
+    lastMessage: 'Aguardando início da missão...',
+    time: '--:--',
+    unread: 0,
+    badgeAlert: false,
+    tag: 'SEG',
+    tagClass: 'security',
+  },
+  {
+    id: 'victor',
+    name: 'Victor Almeida',
+    role: 'Suspeito — Operações',
+    status: 'online',
+    statusText: 'Online',
+    type: 'suspect-opr',
+    glyph: null,
+    initials: 'VA',
+    lastMessage: 'Eu não estava lá naquele dia.',
+    time: '08:31',
+    unread: 0,
+    badgeAlert: false,
+    tag: 'SUSP · OPR',
+    tagClass: 'suspect-opr',
+  },
+  {
+    id: 'rafael',
+    name: 'Rafael Torres',
+    role: 'Suspeito — Administrativo',
+    status: 'online',
+    statusText: 'Online',
+    type: 'suspect-adm',
+    glyph: null,
+    initials: 'RT',
+    lastMessage: 'Só faço o que me mandam, tá?',
+    time: 'ONTEM',
+    unread: 0,
+    badgeAlert: false,
+    tag: 'SUSP · ADM',
+    tagClass: 'suspect-adm',
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora Prado',
+    role: 'Suspeita — Financeiro',
+    status: 'online',
+    statusText: 'Online',
+    type: 'suspect-fin',
+    glyph: null,
+    initials: 'AP',
+    lastMessage: 'Os números não fecham. Verificando...',
+    time: 'SEG',
+    unread: 0,
+    badgeAlert: false,
+    tag: 'SUSP · FIN',
+    tagClass: 'suspect-fin',
+  },
+];
+
+// Os 4 personagens integrados com o backend Flask + IA.
+const AGENTES_INTEGRADOS = ['eduardo', 'victor', 'rafael', 'aurora'];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+const state = {
+  activeContactId: null,
+  isMobileView: false,
+  searchQuery: '',
+};
+
+/* ══════════════════════════════════════════
+   DOM REFERENCES
+══════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+const dom = {
+  app:              $('app'),
+  sidebar:          $('sidebar'),
+  mainPanel:        $('mainPanel'),
+  contactList:      $('contactList'),
+  contactCount:     $('contactCount'),
+  welcomeScreen:    $('welcomeScreen'),
+  chatArea:         $('chatArea'),
+  chatHeader:       $('chatHeader'),
+  chatHeaderAvatar: $('chatHeaderAvatar'),
+  chatHeaderName:   $('chatHeaderName'),
+  chatHeaderStatus: $('chatHeaderStatus'),
+  chatEmpty:        $('chatEmpty'),
+  chatMessages:     $('chatMessages'),
+  chatInput:        $('chatInput'),
+  sendBtn:          $('sendBtn'),
+  backBtn:          $('backBtn'),
+  particleCanvas:   $('particleCanvas'),
+
+  // Operação Last Hope — camadas de missão
+  missionStartOverlay: $('missionStartOverlay'),
+  btnIniciarMissao:    $('btnIniciarMissao'),
+  missionHud:          $('missionHud'),
+  missionTimer:        $('missionTimer'),
+  btnEmergencia:       $('btnEmergencia'),
+  suspectModalOverlay: $('suspectModalOverlay'),
+  suspectModalClose:   $('suspectModalClose'),
+  missionEndOverlay:   $('missionEndOverlay'),
+  missionEndTitle:     $('missionEndTitle'),
+  missionEndText:      $('missionEndText'),
+  btnReiniciarMissao:  $('btnReiniciarMissao'),
+};
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  detectViewport();
+  renderContacts(CONTACTS);
+  bindEvents();
+  initParticles();
+  _dispararNotificacoesIniciais();
+  bindMissionEvents();
+});
+
+/** Dispara notificações iniciais com base nos dados dos contatos. */
+function _dispararNotificacoesIniciais() {
+  CONTACTS.forEach(c => {
+    if (c.unread > 0) {
+      const tipo = c.badgeAlert ? 'alert' : 'normal';
+      for (let i = 0; i < c.unread; i++) mostrarNotificacao(c.id, tipo);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   VIEWPORT DETECTION
+══════════════════════════════════════════ */
+function detectViewport() {
+  const mq = window.matchMedia('(max-width: 768px)');
+  state.isMobileView = mq.matches;
+
+  mq.addEventListener('change', e => {
+    state.isMobileView = e.matches;
+    if (!e.matches) {
+      dom.sidebar.classList.remove('is-hidden');
+      dom.mainPanel.classList.remove('is-hidden');
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   RENDER CONTACTS
+══════════════════════════════════════════ */
+function renderContacts(contacts) {
+  dom.contactList.innerHTML = '';
+
+  if (contacts.length === 0) {
+    dom.contactList.innerHTML =
+      '<p class="contact-list__empty">Nenhum contato encontrado</p>';
+    dom.contactCount.textContent = '0';
+    return;
+  }
+
+  dom.contactCount.textContent = contacts.length;
+
+  contacts.forEach(contact => {
+    const item = document.createElement('div');
+    item.className = 'contact-item';
+    item.dataset.id = contact.id;
+    item.setAttribute('role', 'listitem');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-label', `Conversar com ${contact.name}`);
+
+    if (state.activeContactId === contact.id) {
+      item.classList.add('is-active');
+    }
+
+    const avatarEl = buildAvatar(contact);
+
+    const body = document.createElement('div');
+    body.className = 'contact-body';
+
+    const headerRow = document.createElement('div');
+    headerRow.className = 'contact-header-row';
+    headerRow.innerHTML = `
+      <span class="contact-name">${escHtml(contact.name)}</span>
+      <span class="contact-time">${escHtml(contact.time)}</span>
+    `;
+
+    const previewRow = document.createElement('div');
+    previewRow.className = 'contact-preview-row';
+
+    previewRow.innerHTML = `
+      <span class="contact-preview">${escHtml(contact.lastMessage)}</span>
+    `;
+
+    body.appendChild(headerRow);
+    body.appendChild(previewRow);
+
+    const tag = document.createElement('div');
+    tag.className = `contact-tag contact-tag--${contact.tagClass}`;
+    tag.textContent = contact.tag;
+
+    item.appendChild(avatarEl);
+    item.appendChild(body);
+    item.appendChild(tag);
+
+    item.addEventListener('click', () => selectContact(contact.id));
+    item.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectContact(contact.id);
+      }
+    });
+
+    dom.contactList.appendChild(item);
+  });
+}
+
+function buildAvatar(contact) {
+  const wrap = document.createElement('div');
+  wrap.className = `contact-avatar contact-avatar--${contact.type}`;
+
+  const inner = document.createElement('span');
+  inner.className = contact.glyph ? 'contact-avatar__glyph' : 'contact-avatar__initials';
+  inner.textContent = contact.glyph || contact.initials;
+
+  const statusDot = document.createElement('span');
+  statusDot.className = `contact-avatar__status status--${contact.status}`;
+  statusDot.setAttribute('aria-label', contact.statusText);
+
+  wrap.appendChild(inner);
+  wrap.appendChild(statusDot);
+  return wrap;
+}
+
+/* ══════════════════════════════════════════
+   SELECT CONTACT
+══════════════════════════════════════════ */
+function selectContact(contactId) {
+  const contact = CONTACTS.find(c => c.id === contactId);
+  if (!contact) return;
+
+  if (state.activeContactId === contactId) {
+    state.activeContactId = null;
+    document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('is-active'));
+    dom.chatArea.hidden = true;
+    dom.welcomeScreen.hidden = false;
+    dom.chatInput.disabled = true;
+    dom.sendBtn.disabled = true;
+    if (state.isMobileView) {
+      dom.sidebar.classList.remove('is-hidden');
+      dom.mainPanel.classList.remove('is-hidden');
+    }
+    return;
+  }
+
+  state.activeContactId = contactId;
+
+  document.querySelectorAll('.contact-item').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.id === contactId);
+  });
+
+  populateChatHeader(contact);
+
+  dom.welcomeScreen.hidden = true;
+  dom.chatArea.hidden = false;
+
+  if (state.isMobileView) {
+    showMainPanel();
+  }
+
+  dom.chatInput.disabled = false;
+  dom.sendBtn.disabled = false;
+
+  // Os 4 personagens estão conectados ao backend.
+  // Ao abrir o chat de qualquer um deles, recarregamos o histórico salvo.
+  if (AGENTES_INTEGRADOS.includes(contactId)) {
+    carregarHistoricoAgente(contactId);
+  }
+
+  dom.chatInput.focus();
+
+  removerNotificacao(contactId);
+}
+
+function populateChatHeader(contact) {
+  dom.chatHeaderAvatar.innerHTML = '';
+  const avatarEl = buildAvatar(contact);
+  avatarEl.style.width = '38px';
+  avatarEl.style.height = '38px';
+  dom.chatHeaderAvatar.appendChild(avatarEl);
+
+  dom.chatHeaderName.textContent = contact.name;
+  dom.chatHeaderStatus.textContent = contact.statusText;
+}
+
+/* ══════════════════════════════════════════
+   MOBILE PANEL SWITCHING
+══════════════════════════════════════════ */
+function showMainPanel() {
+  dom.sidebar.classList.add('is-hidden');
+  dom.mainPanel.classList.remove('is-hidden');
+}
+
+function showSidebar() {
+  dom.mainPanel.classList.add('is-hidden');
+  dom.sidebar.classList.remove('is-hidden');
+  setTimeout(() => dom.mainPanel.classList.remove('is-hidden'), 400);
+}
+
+/* ══════════════════════════════════════════
+   SEARCH / FILTER
+══════════════════════════════════════════ */
+function filterContacts(query) {
+  state.searchQuery = query.trim().toLowerCase();
+
+  if (!state.searchQuery) {
+    renderContacts(CONTACTS);
+    return;
+  }
+
+  const filtered = CONTACTS.filter(c =>
+    c.name.toLowerCase().includes(state.searchQuery) ||
+    c.role.toLowerCase().includes(state.searchQuery) ||
+    c.lastMessage.toLowerCase().includes(state.searchQuery)
+  );
+
+  renderContacts(filtered);
+}
+
+/* ══════════════════════════════════════════
+   EVENT BINDINGS
+══════════════════════════════════════════ */
+function bindEvents() {
+  dom.backBtn.addEventListener('click', () => {
+    showSidebar();
+  });
+
+  dom.sendBtn.addEventListener('click', handleSend);
+  dom.chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  dom.contactList.addEventListener('keydown', e => {
+    const items = [...dom.contactList.querySelectorAll('.contact-item')];
+    const focused = document.activeElement;
+    const idx = items.indexOf(focused);
+    if (e.key === 'ArrowDown' && idx < items.length - 1) {
+      e.preventDefault();
+      items[idx + 1].focus();
+    } else if (e.key === 'ArrowUp' && idx > 0) {
+      e.preventDefault();
+      items[idx - 1].focus();
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   OPERAÇÃO LAST HOPE — lógica da missão
+   ─────────────────────────────────────────
+   iniciarMissao()       → clique em "Iniciar Missão": começa o cronômetro
+                           e libera as mensagens do Eduardo
+   tickMissionTimer()    → roda a cada 1s, atualiza o relógio (03:00 → 00:00)
+   abrirSuspectModal()   → mostra o modal de escolha do suspeito
+   selecionarSuspeito()  → decide vitória/derrota conforme o escolhido
+   encerrarMissao()      → mostra a tela final (vitória/derrota/tempo esgotado)
+   reiniciarMissao()     → apaga tudo no servidor e recarrega a página
+══════════════════════════════════════════ */
+const MISSION_DURATION_SECONDS = 360; // 6 minutos
+
+let missionTimerInterval = null;
+let missionRemainingSeconds = MISSION_DURATION_SECONDS;
+let missionModalAutoAberto = false;
+let missionEncerrada = false;
+
+function bindMissionEvents() {
+  dom.btnIniciarMissao.addEventListener('click', iniciarMissao);
+
+  dom.btnEmergencia.addEventListener('click', () => {
+    if (missionEncerrada) return;
+    abrirSuspectModal({ fechavel: true });
+  });
+
+  dom.suspectModalClose.addEventListener('click', fecharSuspectModal);
+
+  dom.suspectModalOverlay.querySelectorAll('.suspect-card__btn').forEach(btn => {
+    btn.addEventListener('click', () => selecionarSuspeito(btn.dataset.suspeito));
+  });
+
+  dom.btnReiniciarMissao.addEventListener('click', reiniciarMissao);
+}
+
+/** Clique em "Iniciar Missão": libera o cronômetro e o Eduardo. */
+async function iniciarMissao() {
+  try {
+    await fetch('/api/missao/iniciar', { method: 'POST' });
+  } catch (err) {
+    console.error('Erro ao iniciar a missão:', err);
+  }
+
+  dom.missionStartOverlay.hidden = true;
+  dom.missionHud.hidden = false;
+
+  missionRemainingSeconds = MISSION_DURATION_SECONDS;
+  missionModalAutoAberto = false;
+  missionEncerrada = false;
+  atualizarDisplayTimer();
+
+  missionTimerInterval = setInterval(tickMissionTimer, 1000);
+
+  // Só agora o Eduardo passa a poder mandar mensagens sozinho.
+  iniciarPollingProativoEduardo();
+}
+
+function tickMissionTimer() {
+  if (missionEncerrada) return;
+
+  missionRemainingSeconds--;
+
+  // Faltando 15s, a escolha do suspeito é forçada (não dá mais pra fechar).
+  if (missionRemainingSeconds <= 15 && !missionModalAutoAberto) {
+    missionModalAutoAberto = true;
+    abrirSuspectModal({ fechavel: false });
+  }
+
+  if (missionRemainingSeconds <= 0) {
+    missionRemainingSeconds = 0;
+    atualizarDisplayTimer();
+    clearInterval(missionTimerInterval);
+    encerrarMissao('tempo_esgotado');
+    return;
+  }
+
+  atualizarDisplayTimer();
+}
+
+function atualizarDisplayTimer() {
+  const min = Math.floor(missionRemainingSeconds / 60).toString().padStart(2, '0');
+  const seg = (missionRemainingSeconds % 60).toString().padStart(2, '0');
+  dom.missionTimer.textContent = `${min}:${seg}`;
+}
+
+function abrirSuspectModal({ fechavel }) {
+  dom.suspectModalOverlay.hidden = false;
+  dom.suspectModalClose.hidden = !fechavel;
+}
+
+function fecharSuspectModal() {
+  dom.suspectModalOverlay.hidden = true;
+}
+
+function selecionarSuspeito(suspeitoId) {
+  if (missionEncerrada) return;
+  fecharSuspectModal();
+
+  if (suspeitoId === 'victor') {
+    encerrarMissao('vitoria');
+  } else {
+    encerrarMissao('derrota');
+  }
+}
+
+/** Mostra a tela final. resultado: 'vitoria' | 'derrota' | 'tempo_esgotado' */
+function encerrarMissao(resultado) {
+  missionEncerrada = true;
+  clearInterval(missionTimerInterval);
+  dom.suspectModalOverlay.hidden = true;
+
+  dom.missionEndOverlay.classList.remove(
+    'mission-end-overlay--vitoria',
+    'mission-end-overlay--derrota'
+  );
+
+  if (resultado === 'vitoria') {
+    dom.missionEndOverlay.classList.add('mission-end-overlay--vitoria');
+    dom.missionEndTitle.textContent = 'MISSÃO CONCLUÍDA';
+    dom.missionEndText.textContent =
+      'Você salvou a Imperium. A origem da invasão foi identificada antes que os bancos de dados fossem apagados.';
+  } else if (resultado === 'derrota') {
+    dom.missionEndOverlay.classList.add('mission-end-overlay--derrota');
+    dom.missionEndTitle.textContent = 'MISSÃO FRACASSADA';
+    dom.missionEndText.textContent =
+      'Você acusou a pessoa errada. Enquanto isso, o invasor permaneceu conectado. Todos os bancos de dados da Imperium foram apagados.';
+  } else {
+    dom.missionEndOverlay.classList.add('mission-end-overlay--derrota');
+    dom.missionEndTitle.textContent = 'TEMPO ESGOTADO';
+    dom.missionEndText.textContent =
+      'Você não conseguiu concluir a investigação. Todos os bancos de dados da Imperium foram apagados.';
+  }
+
+  dom.missionEndOverlay.hidden = false;
+}
+
+/** Clique em "Reiniciar Missão": apaga tudo no servidor e recarrega a página
+ *  do zero — a forma mais segura de garantir que absolutamente nenhum
+ *  estado antigo (timer, mensagens, personagens, pistas já enviadas etc.)
+ *  sobreviva pra próxima partida. */
+async function reiniciarMissao() {
+  try {
+    await fetch('/api/missao/reiniciar', { method: 'POST' });
+  } catch (err) {
+    console.error('Erro ao reiniciar a missão:', err);
+  } finally {
+    window.location.reload();
+  }
+}
+
+/* ══════════════════════════════════════════
+   CHAT DOS PERSONAGENS — integração com o backend Flask
+   ─────────────────────────────────────────
+   appendMessage()            → cria uma bolha de mensagem na tela
+   showTypingIndicator()      → mostra as 3 bolinhas de "digitando..."
+   removeTypingIndicator()    → remove as bolinhas
+   carregarHistoricoAgente()  → busca o histórico salvo (arquivo JSON) daquele personagem
+══════════════════════════════════════════ */
+
+/**
+ * Cria e insere uma bolha de mensagem no container de chat.
+ * Obs.: a classe CSS "msg--victor" é o estilo genérico de "bolha recebida"
+ * (definido assim no CSS original), usado para as respostas de qualquer
+ * um dos 4 personagens — não é exclusivo do Victor.
+ */
+function appendMessage(role, text) {
+  dom.chatEmpty.hidden = true;
+  dom.chatMessages.hidden = false;
+
+  const msg = document.createElement('div');
+  msg.className = `msg msg--${role === 'user' ? 'user' : 'victor'}`;
+  msg.textContent = text;
+
+  dom.chatMessages.appendChild(msg);
+  dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+}
+
+/** Mostra o indicador de "digitando..." (3 bolinhas animadas). */
+function showTypingIndicator() {
+  dom.chatEmpty.hidden = true;
+  dom.chatMessages.hidden = false;
+
+  const typing = document.createElement('div');
+  typing.className = 'msg msg--typing';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+
+  dom.chatMessages.appendChild(typing);
+  dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+}
+
+/** Remove o indicador de "digitando...", se estiver na tela. */
+function removeTypingIndicator() {
+  const typing = document.getElementById('typingIndicator');
+  if (typing) typing.remove();
+}
+
+/** Busca o histórico salvo (via Flask) daquele personagem e recria a conversa na tela. */
+async function carregarHistoricoAgente(contactId) {
+  dom.chatMessages.innerHTML = '';
+
+  try {
+    const res = await fetch(`/api/chat/${contactId}/historico`);
+    const data = await res.json();
+
+    if (data.mensagens && data.mensagens.length > 0) {
+      data.mensagens.forEach(m => appendMessage(m.role, m.content));
+    } else {
+      dom.chatEmpty.hidden = false;
+      dom.chatMessages.hidden = true;
+    }
+  } catch (err) {
+    console.error(`Erro ao carregar histórico de ${contactId}:`, err);
+  }
+}
+
+/**
+ * Envia a mensagem do jogador para o personagem ativo.
+ * Os 4 personagens (Victor, Rafael, Aurora, Eduardo) estão integrados
+ * ao backend Flask + Groq.
+ */
+async function handleSend() {
+  const text = dom.chatInput.value.trim();
+  if (!text || !state.activeContactId) return;
+
+  const contactId = state.activeContactId;
+
+  dom.chatInput.value = '';
+
+  if (!AGENTES_INTEGRADOS.includes(contactId)) {
+    console.log('[LAST HOPE] Message to', contactId, ':', text);
+    return;
+  }
+
+  appendMessage('user', text);
+  dom.chatInput.disabled = true;
+  dom.sendBtn.disabled = true;
+
+  showTypingIndicator();
+
+  try {
+    const res = await fetch(`/api/chat/${contactId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+
+    removeTypingIndicator();
+
+    if (data.reply) {
+      appendMessage('victor', data.reply);
+      atualizarContatoAposResposta(contactId, data.reply);
+    } else {
+      appendMessage('victor', data.error || '[Não foi possível responder. Tente novamente.]');
+    }
+  } catch (err) {
+    removeTypingIndicator();
+    appendMessage('victor', '[Erro de conexão com o servidor.]');
+    console.error(err);
+  } finally {
+    dom.chatInput.disabled = false;
+    dom.sendBtn.disabled = false;
+    dom.chatInput.focus();
+  }
+}
+
+/* ══════════════════════════════════════════
+   PARTICLE CANVAS
+══════════════════════════════════════════ */
+function initParticles() {
+  const canvas = dom.particleCanvas;
+  const ctx = canvas.getContext('2d');
+
+  let particles = [];
+  let animId;
+  let W, H;
+
+  const CFG = {
+    count: 55,
+    maxSpeed: 0.35,
+    minRadius: 1,
+    maxRadius: 2.5,
+    connectDist: 120,
+    colors: [
+      'rgba(245,197,24,',
+      'rgba(201,168,76,',
+      'rgba(0,255,209,',
+    ],
+    opacityBase: 0.5,
+  };
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = canvas.width  = rect.width;
+    H = canvas.height = rect.height;
+    particles = Array.from({ length: CFG.count }, createParticle);
+  }
+
+  function createParticle() {
+    const colorBase = CFG.colors[Math.floor(Math.random() * CFG.colors.length)];
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * CFG.maxSpeed * 2,
+      vy: (Math.random() - 0.5) * CFG.maxSpeed * 2,
+      r: CFG.minRadius + Math.random() * (CFG.maxRadius - CFG.minRadius),
+      colorBase,
+      opacity: 0.2 + Math.random() * CFG.opacityBase,
+    };
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -10) p.x = W + 10;
+      else if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10;
+      else if (p.y > H + 10) p.y = -10;
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < CFG.connectDist) {
+          const alpha = (1 - dist / CFG.connectDist) * 0.15;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(245,197,24,${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (const p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `${p.colorBase}${p.opacity})`;
+      ctx.fill();
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(animId);
+    } else {
+      draw();
+    }
+  });
+
+  const ro = new ResizeObserver(() => {
+    resize();
+  });
+  ro.observe(canvas.parentElement);
+
+  resize();
+  draw();
+}
+
+/* ══════════════════════════════════════════
+   SISTEMA DE NOTIFICAÇÕES
+══════════════════════════════════════════ */
+
+const _notifState = new Map();
+
+function mostrarNotificacao(contactId, tipo = 'normal') {
+  const existing = _notifState.get(contactId);
+  const count = existing ? existing.count + 1 : 1;
+  _notifState.set(contactId, { tipo, count });
+  _renderNotifBadge(contactId);
+  _atualizarStatCard();
+}
+
+function removerNotificacao(contactId) {
+  _notifState.delete(contactId);
+  _renderNotifBadge(contactId);
+  _atualizarStatCard();
+}
+
+function atualizarNotificacao(contactId, tipo) {
+  const existing = _notifState.get(contactId);
+  if (!existing) return;
+  _notifState.set(contactId, { ...existing, tipo });
+  _renderNotifBadge(contactId);
+}
+
+function _renderNotifBadge(contactId) {
+  const item = dom.contactList.querySelector(`[data-id="${contactId}"]`);
+  if (!item) return;
+
+  const oldBadge = item.querySelector('.notif-badge');
+  if (oldBadge) oldBadge.remove();
+  item.classList.remove('contact-item--has-notif');
+
+  const notif = _notifState.get(contactId);
+  if (!notif) return;
+
+  const badge = document.createElement('span');
+  badge.className = `notif-badge notif-badge--${notif.tipo}`;
+  badge.setAttribute('aria-label', `${notif.count} notificação${notif.count > 1 ? 'ões' : ''}`);
+  badge.textContent = notif.tipo === 'alert' ? '!' : notif.count;
+
+  const previewRow = item.querySelector('.contact-preview-row');
+  if (previewRow) previewRow.appendChild(badge);
+
+  item.classList.add('contact-item--has-notif');
+}
+
+/**
+ * Chamada toda vez que um personagem responde de verdade (via IA).
+ * Atualiza a prévia da última mensagem e o horário na lista de contatos,
+ * e dispara uma notificação (badge) se aquele contato não for o que
+ * está aberto no momento.
+ */
+function atualizarContatoAposResposta(contactId, texto) {
+  const contact = CONTACTS.find(c => c.id === contactId);
+  if (!contact) return;
+
+  contact.lastMessage = texto;
+  contact.time = _formatarHoraAgora();
+
+  const listaAtual = state.searchQuery
+    ? CONTACTS.filter(c =>
+        c.name.toLowerCase().includes(state.searchQuery) ||
+        c.role.toLowerCase().includes(state.searchQuery) ||
+        c.lastMessage.toLowerCase().includes(state.searchQuery))
+    : CONTACTS;
+
+  renderContacts(listaAtual);
+
+  if (state.activeContactId !== contactId) {
+    mostrarNotificacao(contactId, 'normal');
+  }
+}
+
+function _formatarHoraAgora() {
+  const d = new Date();
+  return d.toTimeString().slice(0, 5);
+}
+
+/**
+ * Fica checando de tempos em tempos se o Eduardo tem alguma mensagem
+ * espontânea pra mandar (configuradas em agents/eduardo_pistas.json,
+ * no backend). Se o chat dele estiver aberto, a mensagem aparece na
+ * hora; se não estiver, só atualiza a prévia e mostra a notificação.
+ */
+function iniciarPollingProativoEduardo() {
+  const INTERVALO_MS = 5000; // confere a cada 5 segundos (missão dura 6 minutos)
+
+  async function verificar() {
+    try {
+      const res = await fetch('/api/chat/eduardo/proativo');
+      const data = await res.json();
+
+      (data.mensagens || []).forEach(texto => {
+        if (state.activeContactId === 'eduardo') {
+          appendMessage('victor', texto);
+        }
+        atualizarContatoAposResposta('eduardo', texto);
+      });
+    } catch (err) {
+      console.error('Erro ao verificar mensagens espontâneas do Eduardo:', err);
+    }
+  }
+
+  verificar();
+  setInterval(verificar, INTERVALO_MS);
+}
+
+function _atualizarStatCard() {
+  const dot = document.getElementById('statNotifDot');
+  if (!dot) return;
+  dot.hidden = _notifState.size === 0;
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

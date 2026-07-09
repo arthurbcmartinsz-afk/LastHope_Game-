@@ -1,0 +1,28 @@
+[
+  {
+    "segundos": 0,
+    "mensagens": [
+      "Sou Eduardo Moreira, chefe de Segurança da Informação da Imperium.",
+      "Precisamos agir rápido: ocorreu uma invasão aos nossos sistemas e, até o momento, nossos principais suspeitos são Aurora Prado, Rafael Torres e Victor Almeida.",
+      "Converse com cada um deles e descubra qual é a área em que trabalham, no que estavam atuando no dia 17 de outubro, o que fizeram durante a manhã e qualquer detalhe que possa ajudar a reconstruir os acontecimentos.",
+      "Enquanto você investiga, continuarei analisando novas evidências e entrarei em contato assim que encontrar algo relevante."
+    ]
+  },
+  {
+    "segundos": 120,
+    "mensagens": [
+      "Eai, encontrou alguma coisa?",
+      "Enquanto isso, dei uma olhada no histórico de navegação dos três.",
+      "Rafael andou acessando vários sites de apostas esportivas e jogos.",
+      "Victor pesquisou sobre vagas em outros escritórios de advocacia.",
+      "Ainda não prova nada, mas vale perguntar a eles sobre isso."
+    ]
+  },
+  {
+    "segundos": 300,
+    "mensagens": [
+      "Eai, como está a investigação? Descobriu algo novo?",
+      "Continue conversando com os três. Qualquer detalhe pode ser importante."
+    ]
+  }
+]
